@@ -6,8 +6,8 @@
 
 extern int something_external();
 
-int
-open_close(void)
+// False positive
+int open_close(void)
 {
     int           fd;
     int           pret;
@@ -17,10 +17,18 @@ open_close(void)
         return 0;
     }
     // This do-while loop seems to break the analysis
-    // Commenting out the loop (keeping the body) results in a correct analysis
+    // if we set errno at some point to any value:
+    //
+    // > errno = EAGAIN;
+    //
+    // or
+    //
+    // > errno = EINVAL;
+    //
+    // then the error disappers
     do {
         pret = something_external();
-    } while (pret < 0 && (errno == EINTR || errno == EAGAIN));
+    } while (pret < 0 && (errno == EINTR || errno == EAGAIN)); // XXX because errno never changes?!!?
     if (pret != 1) {
         (void) close(fd);
         return -1;
