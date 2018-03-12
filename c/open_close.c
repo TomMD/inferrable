@@ -13,6 +13,8 @@ int open_close(void)
     int           pret;
 
     fd = open("/dev/random", O_RDONLY);
+    // N.B. if we set `errno` the bug disappears
+    // errno = EINVAL;
     do {
         pret = something_external();
     } while (pret < 0 && (errno == EINTR || errno == EAGAIN));
